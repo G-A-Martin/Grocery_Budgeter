@@ -1,0 +1,316 @@
+<!Doctype <!DOCTYPE html>
+<html>
+
+<head>
+    <title>Calvin Hacks</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+        integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+    <script src="script.js"></script>
+    <script src="jquery.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/jquery@3.1.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.2/dist/vue.js"></script>
+    <script>
+        function deleteRow(row) {
+            console.log(row);
+            var name = document.getElementById('searchText').value;
+            name = row
+            var foodItem = { item: name };
+
+            event.preventDefault();
+            $.ajax({
+                type: 'DELETE',
+                url: '/deleteFromGroceryList',
+                data: foodItem
+            }).done(function (resp) {
+                var response = resp;
+                //document.getElementById('serverResponse').innerHTML = response;
+                // document.getElementById('serverResponse').innerHTML = ($('.price-group', response).attr('aria-label'));
+                // var amount = document.getElementById('itemAmount').value;
+            })
+                .fail(function (xhr, status, errorThrown) {
+                    // document.getElementById('serverResponse').innerHTML = errorThrown;
+                    ;
+                }).then(function (value) {
+                    location.reload();
+                })
+            location.reload();
+        }
+
+        $(document).ready(function () {
+            updateTable(false);
+
+            function updateTable(refresh) {
+                $.ajax({
+                    type: 'GET',
+                    url: '/getGroceryList',
+                    data: ''
+                }).done(function (resp) {
+
+                    var response = JSON.parse(resp);
+                    console.log(response);
+                    var groceryList = [];
+
+                    response.forEach(function (value) {
+                        groceryList.push(value);
+                    })
+
+                    console.log(groceryList);
+                    var predictedTotal = 0.0;
+                    var groceryTable = document.getElementById("groceryTable");
+
+                    for (i = 0; i < groceryList.length; i++) {
+                        if (refresh) {
+                            groceryTable.deleteRow(i);
+                        }
+                        var row = groceryTable.insertRow(i);
+                        var cell1 = row.insertCell(0);
+                        var cell2 = row.insertCell(1);
+                        var cell3 = row.insertCell(2);
+                        var cell4 = row.insertCell(3);
+
+                        var priceNum = parseFloat(groceryList[i].price.split("$")[1]);
+                        var currentCell = groceryList[i].item;
+
+                        console.log(priceNum);
+                        console.log(predictedTotal);
+
+                        predictedTotal = predictedTotal + priceNum;
+
+                        cell1.innerHTML = groceryList[i].item;
+                        cell2.innerHTML = groceryList[i].amount;
+                        cell3.innerHTML = groceryList[i].price;
+                        cell4.innerHTML = '<button onclick="deleteRow(\'' + (groceryList[i].item).toString() + '\')" class="pr-10 delete-button" style="float: right"><i class="glyphicon glyphicon-trash pr-10"></i> Delete</button>';
+                        onclick="openRecipeDetail(\'' + (recipeList[i].name).toString() + '\')"
+                    }
+
+                    var header = groceryTable.createTHead();
+                    var row = header.insertRow(0);
+                    var cell1 = row.insertCell(0);
+                    var cell2 = row.insertCell(1);
+                    var cell3 = row.insertCell(2);
+
+                    cell1.innerHTML = "ITEM";
+                    cell2.innerHTML = "AMOUNT";
+                    cell3.innerHTML = "PRICE";
+
+                    document.getElementById("predictedTotal").value = predictedTotal;
+                });
+            }
+
+            $('#postToGroceryList').click(function (event) {
+                var name = document.getElementById('searchText').value;
+                var foodItem = { item: name };
+
+                event.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: '/getPrice',
+                    data: foodItem
+                }).done(function (resp) {
+                    var response = resp;
+                    //document.getElementById('serverResponse').innerHTML = response;
+                    // document.getElementById('serverResponse').innerHTML = ($('.price-group', response).attr('aria-label'));
+                    var amount = 1;
+                    // var amount = document.getElementById('itemAmount').value;
+                    var price = ($('.price-group', response).attr('aria-label'));
+                    var foodName = name;
+                    $.ajax({
+                        type: 'POST',
+                        url: '/addToGroceryList',
+                        data: { item: foodName, amount: amount, price: price }
+                    }).done(function (resp) {
+                        var response = resp;
+                        //document.getElementById('serverResponse').innerHTML = response;
+                        // document.getElementById('serverResponse').innerHTML = response;
+                    })
+                        .fail(function (xhr, status, errorThrown) {
+                            // document.getElementById('serverResponse').innerHTML = errorThrown;
+                            ;
+                        })
+                })
+                    .fail(function (xhr, status, errorThrown) {
+                        // document.getElementById('serverResponse').innerHTML = errorThrown;
+                        ;
+                    }).then(function (value) {
+                        location.reload();
+                    })
+            });
+            $('#getButton').click(function (event) {
+                event.preventDefault();
+                $.ajax({
+                    type: 'GET',
+                    url: '/getFood',
+                    data: ''
+                }).done(function (resp) {
+                    var response = resp;
+                    document.getElementById('serverResponse').innerHTML = response;
+                })
+                    .fail(function (xhr, status, errorThrown) {
+                        document.getElementById('serverResponse').innerHTML = errorThrown;;
+                    })
+            });
+            $('#postButton').click(function (event) {
+                event.preventDefault();
+                var itemFromHTML = document.getElementById('addFoodInput').value;
+                var foodItem = {
+                    item: itemFromHTML
+                };
+                $.ajax({
+                    type: 'POST',
+                    url: '/postFood',
+                    data: foodItem
+                }).done(function (resp) {
+                    var response = resp;
+                    document.getElementById('serverResponse').innerHTML = response;
+                })
+                    .fail(function (xhr, status, errorThrown) {
+                        document.getElementById('serverResponse').innerHTML = errorThrown;;
+                    })
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <!-- <section>
+    <div class="container">
+        <header>
+            <h2>Grocery Tracker</h2>
+        </header>
+        <div class="row">
+            <ul>
+                <li><a href="/editItem.html">Add Item</a></li>
+                <li><a href="/currentList.html">Current List</a></li>
+            </ul>
+        </div>
+    </div>
+</section> -->
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-3 bg-dark-brown" style="height: 80px;">
+                <header class="pl-20">
+                    <h2 class="font-white">Grocery Tracker</h2>
+                </header>
+            </div>
+            <div class="col-sm-9 px-0">
+                <div class="py-40 bg-light-brown">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3 bg-dark-brown">
+                <!--Navigation Bar-->
+                <div class="row">
+                    <a href="/home.html">
+                        <div class="nav-bar-btn">
+                            <p>
+                                <i class="glyphicon glyphicon-home pr-10"></i>
+                                Home</p>
+                        </div>
+                    </a>
+                    <a href="/groceryList.html">
+                        <div class="nav-bar-btn">
+                            <p>
+                                <i class="glyphicon glyphicon-shopping-cart pr-10"></i>
+                                Grocery List</p>
+                        </div>
+                    </a>
+                    <a href="/recipeList.html">
+                        <div class="nav-bar-btn">
+                            <p>
+                                <i class="glyphicon glyphicon-cutlery pr-10 current-btn"></i>
+                                Recipes</p>
+                        </div>
+                    </a>
+                    <a class ="hidden" href="/currentList.html">
+                        <div class="nav-bar-btn">
+                            <p>
+                                <i class="glyphicon glyphicon-list pr-10"></i>
+                                Current Items</p>
+                        </div>
+                    </a>
+                    <a class ="hidden" href="/editItem.html">
+                        <div class="nav-bar-btn">
+                            <p>
+                                <i class="glyphicon glyphicon-plus pr-10"></i>
+                                Add Items</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="row h-100"></div>
+                <!--End Navigation Bar-->
+            </div>
+            <div class="col-sm-9 px-0">
+                <div class="bg-cream">
+                    <div class="row">
+
+                        <div class="col-sm-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="m-0">Add Item</h2>
+                                </div>
+                                <div class="card-body">
+                                    <form>
+                                        <div class="row">
+                                            <div class="col-sm-9">
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+                                                        <input type="text" id="searchText" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="col-sm-12">
+                                                    <button id="postToGroceryList" class="btn btn-default"
+                                                        style="float: right">Add Item</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="m-0">Totals</h2>
+                                </div>
+                                <div class="card-body">
+                                    <form>
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <label class="totalLabel">Predicted Total</label>
+                                                <input type="number" id="predictedTotal" disabled />
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="m-0">Grocery List</h2>
+                        </div>
+                        <table class="table" id="groceryTable">
+                        </table>
+                    </div>
+                    <div class="bg-cream h-100">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

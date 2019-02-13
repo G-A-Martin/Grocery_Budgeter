@@ -1,0 +1,189 @@
+<!Doctype <!DOCTYPE html>
+<html>
+
+<head>
+    <title>Calvin Hacks</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+        integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+    <script src="script.js"></script>
+    <script src="jquery.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/jquery@3.1.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.2/dist/vue.js"></script>
+    <script>
+        function openRecipeDetail(name) {
+            console.log(name);
+            localStorage.setItem("storageName", name);
+            location.replace("/recipeDetail.html");
+        }
+
+        $(document).ready(function () {
+            updateTable();
+
+
+            $('#createRecipe').click(function (event) {
+                event.preventDefault();
+                console.log('started add recipe');
+                var recipeName = document.getElementById('createRecipeInput').value;
+                $.ajax({
+                    type: 'POST',
+                    url: '/createRecipe',
+                    data: { name: recipeName, ingredientList: [] }
+                }).done(function (resp) {
+                    var response = resp;
+                    console.log('created recipe: ' + response);
+                })
+                    .fail(function (xhr, status, errorThrown) {
+                        console.log('created recipe: ' + errorThrown);
+                    })
+                    location.reload();
+
+            })
+        });
+
+
+        function updateTable() {
+            $.ajax({
+                type: 'GET',
+                url: '/getRecipes',
+                data: ''
+            }).done(function (resp) {
+
+                var response = JSON.parse(resp);
+                console.log(response);
+                var recipeList = [];
+
+                response.forEach(function (value) {
+                    recipeList.push(value);
+                })
+
+                var recipeTable = document.getElementById("recipeTable");
+
+
+                for (i = 0; i < recipeList.length; i++) {
+                    var row = recipeTable.insertRow(i);
+                    var cell1 = row.insertCell(0);
+                    var cell2 = row.insertCell(1);
+
+                    // var priceNum = parseFloat(groceryList[i].price.split("$")[1]);
+
+                    //   console.log(priceNum);
+                    //  console.log(predictedTotal);
+
+                    //  predictedTotal = predictedTotal + priceNum;
+
+                    cell1.innerHTML = recipeList[i].name;
+                    console.log(recipeList[i]);
+                    cell2.innerHTML = '<button onclick="openRecipeDetail(\'' + (recipeList[i].name).toString() + '\')" class="pr-10 delete-button" style="float: right"><i class="glyphicon glyphicon-folder-open pr-10"></i> Open</button>';
+                }
+
+                //  document.getElementById("predictedTotal").value = predictedTotal;
+            });
+        }
+    </script>
+</head>
+
+
+
+
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-3 bg-dark-brown" style="height: 80px;">
+                <header class="pl-20">
+                    <h2 class="font-white">Grocery Tracker</h2>
+                </header>
+            </div>
+            <div class="col-sm-9 px-0">
+                <div class="py-40 bg-light-brown">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3 bg-dark-brown">
+                <!--Navigation Bar-->
+                <div class="row">
+                    <a href="/home.html">
+                        <div class="nav-bar-btn">
+                            <p>
+                                <i class="glyphicon glyphicon-home pr-10"></i>
+                                Home</p>
+                        </div>
+                    </a>
+                    <a href="/groceryList.html">
+                        <div class="nav-bar-btn">
+                            <p>
+                                <i class="glyphicon glyphicon-shopping-cart pr-10"></i>
+                                Grocery List</p>
+                        </div>
+                    </a>
+                    <a href="/recipeTable.html">
+                        <div class="nav-bar-btn">
+                            <p>
+                                <i class="glyphicon glyphicon-cutlery pr-10 current-btn"></i>
+                                Recipe</p>
+                        </div>
+                    </a>
+                    <a class="hidden" href="/currentList.html">
+                        <div class="nav-bar-btn">
+                            <p>
+                                <i class="glyphicon glyphicon-list pr-10"></i>
+                                Current Items</p>
+                        </div>
+                    </a>
+                    <a class="hidden" href="/editItem.html">
+                        <div class="nav-bar-btn">
+                            <p>
+                                <i class="glyphicon glyphicon-plus pr-10"></i>
+                                Add Items</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="row h-100"></div>
+                <!--End Navigation Bar-->
+            </div>
+            <div class="col-sm-9 px-0">
+                <div class="bg-cream">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="m-0">Create Recipe</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <input type="text" id='createRecipeInput' />
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <button class="btn btn-default" id="createRecipe">Create Recipe</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="m-0">Recipes</h2>
+                        </div>
+                        <table class="table" id="recipeTable">
+                        </table>
+                    </div>
+                    <div class="bg-cream h-100">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

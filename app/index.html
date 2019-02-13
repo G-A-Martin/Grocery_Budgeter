@@ -1,0 +1,182 @@
+<!Doctype <!DOCTYPE html>
+<html>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+<div id="home">
+    <div>
+        <div class="row">
+            <h2>Add an Item</h2>
+        </div>
+        <div class="row">
+            <label>Name</label>
+            <input v-model="item"/>
+        </div>
+        <button v-on:click="test">Add Food Item</button>
+    </div>
+    <button>Go Home</button>
+</div> -->
+
+
+<head>
+    <title>Calvin Hacks</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script src="script.js"></script>
+    <script src="jquery.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/jquery@3.1.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.2/dist/vue.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#getButton').click(function (event) {
+                event.preventDefault();
+                $.ajax({
+                    type: 'GET',
+                    url: '/getFood',
+                    data: ''
+                }).done(function (resp) {
+                    var response = resp;
+                    document.getElementById('serverResponse').innerHTML = response;
+                })
+                    .fail(function (xhr, status, errorThrown) {
+                        document.getElementById('serverResponse').innerHTML = errorThrown;;
+                    })
+            });
+            $('#postButton').click(function (event) {
+                event.preventDefault();
+                var itemFromHTML = document.getElementById('addFoodInput').value;
+                var foodItem = {
+                    item: itemFromHTML
+                };
+                $.ajax({
+                    type: 'POST',
+                    url: '/postFood',
+                    data: foodItem
+                }).done(function (resp) {
+                    var response = resp;
+                    document.getElementById('serverResponse').innerHTML = response;
+                })
+                    .fail(function (xhr, status, errorThrown) {
+                        document.getElementById('serverResponse').innerHTML = errorThrown;;
+                    })
+            });
+            $('#postToGroceryList').click(function (event) {
+                var name = document.getElementById('itemName').value;
+                var foodItem = {
+                    item: name
+                };
+
+                event.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: '/getPrice',
+                    data: foodItem
+                }).done(function (resp) {
+                    var response = resp;
+                    //document.getElementById('serverResponse').innerHTML = response;
+                    document.getElementById('serverResponse').innerHTML = ($('.price-group',
+                        response).attr('aria-label'));
+                    var amount = document.getElementById('itemAmount').value;
+                    var price = ($('.price-group', response).attr('aria-label'));
+                    var foodName = name;
+                    $.ajax({
+                        type: 'POST',
+                        url: '/addToGroceryList',
+                        data: {
+                            item: foodName,
+                            amount: amount,
+                            price: price
+                        }
+                    }).done(function (resp) {
+                        var response = resp;
+                        //document.getElementById('serverResponse').innerHTML = response;
+                        document.getElementById('serverResponse').innerHTML = response;
+                    })
+                        .fail(function (xhr, status, errorThrown) {
+                            document.getElementById('serverResponse').innerHTML =
+                                errorThrown;;
+                        })
+                })
+                    .fail(function (xhr, status, errorThrown) {
+                        document.getElementById('serverResponse').innerHTML = errorThrown;;
+                    })
+            });
+
+            $('#getGroceryList').click(function (event) {
+                event.preventDefault();
+                $.ajax({
+                    type: 'GET',
+                    url: '/getGroceryList',
+                    data: ''
+                }).done(function (resp) {
+                    var response = resp;
+                    //document.getElementById('serverResponse').innerHTML = response;
+                    document.getElementById('serverResponse').innerHTML = response;
+
+                })
+                    .fail(function (xhr, status, errorThrown) {
+                        document.getElementById('serverResponse').innerHTML = errorThrown;;
+                    })
+            })
+
+
+            $('#getGroceryList').click(function (event) {
+                event.preventDefault();
+                $.ajax({
+                    type: 'GET',
+                    url: '/getGroceryList',
+                    data: ''
+                }).done(function (resp) {
+                    var response = resp;
+                    //document.getElementById('serverResponse').innerHTML = response;
+                    document.getElementById('serverResponse').innerHTML = response;
+
+                })
+                    .fail(function (xhr, status, errorThrown) {
+                        document.getElementById('serverResponse').innerHTML = errorThrown;;
+                    })
+            })
+
+
+
+
+            $('#getRecipeList').click(function (event) {
+                event.preventDefault();
+                $.ajax({
+                    type: 'GET',
+                    url: '/getRecipes',
+                    data: ''
+                }).done(function (resp) {
+                    var response = resp;
+                    //document.getElementById('serverResponse').innerHTML = response;
+                    document.getElementById('serverResponse').innerHTML = response;
+
+                })
+                    .fail(function (xhr, status, errorThrown) {
+                        document.getElementById('serverResponse').innerHTML = errorThrown;;
+                    })
+            })
+
+        });
+    </script>
+</head>
+
+<body>
+    <div class="row">
+        <div class="bg-dark-brown h-100">
+            <header class="pt-300" style="text-align: center;">
+                <h1 class="font-white text-center">Welcome to the Grocery Tracker!</h1>
+            </header>
+            <div class="row">
+                <div class="col-sm-12" style="text-align: center">
+                    <a href="/home.html">
+                        <button class="btn btn-default">Start Grocery Tracking</button>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+
+</html>
